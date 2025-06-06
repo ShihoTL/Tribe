@@ -11,6 +11,30 @@ const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
+// Add CORS middleware - allows all origins for now
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+  );
+
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
+// Add basic security headers
+app.use((req, res, next) => {
+  res.header('X-Content-Type-Options', 'nosniff');
+  res.header('X-Frame-Options', 'DENY');
+  res.header('X-XSS-Protection', '1; mode=block');
+  next();
+});
+
 // Validate environment variables
 if (!process.env.PRIVY_APP_ID || !process.env.PRIVY_API_KEY) {
   console.error(
@@ -51,7 +75,10 @@ app.post('/send-login-code', async (req, res) => {
     console.error('Error sending login code:', error);
     res.status(500).json({
       error: 'Failed to send login code',
-      details: error.message,
+      details:
+        process.env.NODE_ENV === 'production'
+          ? 'Internal server error'
+          : error.message,
     });
   }
 });
@@ -99,12 +126,15 @@ app.post('/verify-code', async (req, res) => {
     console.error('Error verifying code:', error);
     res.status(400).json({
       error: 'Invalid verification code',
-      details: error.message,
+      details:
+        process.env.NODE_ENV === 'production'
+          ? 'Verification failed'
+          : error.message,
     });
   }
 });
 
-// Fixed endpoint for direct user creation (without OTP)
+// User creation endpoint (without OTP)
 app.post('/create-user', async (req, res) => {
   const { email } = req.body;
 
@@ -137,7 +167,6 @@ app.post('/create-user', async (req, res) => {
           address: email.toLowerCase().trim(),
         },
       ],
-      // Replace the deprecated 'wallets' parameter with individual wallet creation flags
       createSolanaWallet: true,
     });
 
@@ -159,7 +188,10 @@ app.post('/create-user', async (req, res) => {
 
     res.status(error.status || 500).json({
       error: 'Failed to create user and wallet',
-      details: errorDetails,
+      details:
+        process.env.NODE_ENV === 'production'
+          ? 'User creation failed'
+          : errorDetails,
     });
   }
 });
@@ -170,19 +202,34 @@ app.get('/health', (req, res) => {
     message: 'Server is running',
     privyConfigured: !!(process.env.PRIVY_APP_ID && process.env.PRIVY_API_KEY),
     timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
   });
 });
 
-// Debug endpoint to check environment (remove in production)
-app.get('/debug-env', (req, res) => {
-  res.status(200).json({
-    hasAppId: !!process.env.PRIVY_APP_ID,
-    hasApiKey: !!process.env.PRIVY_API_KEY,
-    appIdLength: process.env.PRIVY_APP_ID?.length,
-    // Don't expose actual values for security
+// Remove or secure debug endpoint for production
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/debug-env', (req, res) => {
+    res.status(200).json({
+      hasAppId: !!process.env.PRIVY_APP_ID,
+      hasApiKey: !!process.env.PRIVY_API_KEY,
+      appIdLength: process.env.PRIVY_APP_ID?.length,
+      environment: process.env.NODE_ENV,
+    });
   });
+}
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  process.exit(0);
 });
 
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+process.on('SIGINT', () => {
+  console.log('SIGINT received, shutting down gracefully');
+  process.exit(0);
+});
+
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server running on port ${port}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });

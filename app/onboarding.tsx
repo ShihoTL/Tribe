@@ -36,7 +36,7 @@ import Animated, {
 import ScreenWrapper from '@/components/ScreenWrapper';
 
 // Backend API base URL - now using Render URL for both dev and production
-const API_BASE_URL = 'https://tribe-node.onrender.com';
+const API_BASE_URL = 'https://tribe-y080.onrender.com';
 
 export default function OnboardingScreen() {
   const [isSigningUp, setIsSigningUp] = useState(false);

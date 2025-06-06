@@ -35,10 +35,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import ScreenWrapper from '@/components/ScreenWrapper';
 
-// Backend API base URL - update this to your actual backend URL
-const API_BASE_URL = __DEV__
-  ? 'http://192.168.163.117:8082' // Updated to match your Node.js server port
-  : 'https://your-production-api.com';
+// Backend API base URL - now using Render URL for both dev and production
+const API_BASE_URL = 'https://tribe-node.onrender.com';
 
 export default function OnboardingScreen() {
   const [isSigningUp, setIsSigningUp] = useState(false);
@@ -302,7 +300,7 @@ export default function OnboardingScreen() {
 
           <Animated.View style={[styles.stepContainer, step3AnimatedStyle]}>
             <View style={styles.successContainer}>
-              <Wallet size={48} color={Colors.accent.green || '#10B981'} />
+              <Wallet size={48} color="#10B981" />
               <Text style={styles.stepTitle}>All Set!</Text>
               <Text style={styles.stepSubtitle}>
                 Your account and Solana wallet have been created successfully
@@ -639,7 +637,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   verifiedText: {
-    color: Colors.accent.green || '#10B981',
+    color: '#10B981',
   },
   walletAddress: {
     fontFamily: 'Poppins-Regular',

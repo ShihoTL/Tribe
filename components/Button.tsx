@@ -1,12 +1,12 @@
 import React, { ReactNode } from 'react';
-import { 
-  TouchableOpacity, 
-  Text, 
-  StyleSheet, 
-  ActivityIndicator, 
-  StyleProp, 
+import {
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+  StyleProp,
   ViewStyle,
-  TextStyle 
+  TextStyle,
 } from 'react-native';
 import Colors from '@/constants/Colors';
 
@@ -33,7 +33,7 @@ export default function Button({
 }: ButtonProps) {
   const getButtonStyle = () => {
     if (disabled) return styles.disabledButton;
-    
+
     switch (variant) {
       case 'secondary':
         return styles.secondaryButton;
@@ -43,10 +43,10 @@ export default function Button({
         return styles.primaryButton;
     }
   };
-  
+
   const getTextStyle = () => {
     if (disabled) return styles.disabledButtonText;
-    
+
     switch (variant) {
       case 'secondary':
         return styles.secondaryButtonText;
@@ -64,19 +64,23 @@ export default function Button({
       disabled={disabled || loading}
     >
       {loading ? (
-        <ActivityIndicator 
-          size="small" 
-          color={variant === 'outline' ? Colors.accent.orange : Colors.text.primary} 
+        <ActivityIndicator
+          size="small"
+          color={
+            variant === 'outline' ? Colors.accent.orange : Colors.text.primary
+          }
         />
       ) : (
         <>
           {icon && <>{icon}</>}
-          <Text style={[
-            styles.buttonText, 
-            getTextStyle(), 
-            icon ? styles.buttonTextWithIcon : null,
-            textStyle
-          ]}>
+          <Text
+            style={[
+              styles.buttonText,
+              getTextStyle(),
+              icon ? styles.buttonTextWithIcon : null,
+              textStyle,
+            ]}
+          >
             {title}
           </Text>
         </>
@@ -92,7 +96,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 12,
     paddingHorizontal: 24,
-    borderRadius: 8,
+    borderRadius: 15,
   },
   primaryButton: {
     backgroundColor: Colors.accent.orange,
